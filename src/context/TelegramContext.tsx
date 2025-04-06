@@ -1,6 +1,15 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
 
+// Define the Telegram WebApp type
+declare global {
+  interface Window {
+    Telegram?: {
+      WebApp: TelegramWebApp;
+    };
+  }
+}
+
 interface TelegramWebApp {
   ready: () => void;
   expand: () => void;
@@ -127,8 +136,19 @@ export const TelegramProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const showAlert = (message: string) => {
-    if (!tg) return;
-    tg.showAlert(message);
+    if (!tg) {
+      // Fallback alert for browser mode
+      alert(message);
+      return;
+    }
+    
+    try {
+      tg.showAlert(message);
+    } catch (error) {
+      // Fallback if showAlert is not supported
+      console.error("Error showing alert:", error);
+      alert(message);
+    }
   };
 
   return (

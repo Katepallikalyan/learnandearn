@@ -5,6 +5,7 @@ import { ThumbsUp, ThumbsDown, Timer, Check } from "lucide-react";
 import { calculateTimeRemaining, calculateVotePercentages } from "../utils/hathorUtils";
 import { castVote } from "../services/api";
 import { useTelegram } from "../context/TelegramContext";
+import { toast } from "../hooks/use-toast";
 
 interface GovernanceProposal {
   id: number;
@@ -21,14 +22,18 @@ interface GovernanceVoteProps {
   onVoteSuccess: () => void;
 }
 
-const GovernanceVote: React.FC<GovernanceVoteProps> = ({ proposal, onVoteSuccess }) => {
+const GovernanceVote: React.FC<GovernanceVoteProps> = ({ proposal: initialProposal, onVoteSuccess }) => {
   const { address, votingPower } = useWeb3();
   const { showAlert } = useTelegram();
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [timeRemaining, setTimeRemaining] = useState<string>(
-    calculateTimeRemaining(new Date(proposal.endDate))
+    calculateTimeRemaining(new Date(initialProposal.endDate))
   );
   const [hasVoted, setHasVoted] = useState<boolean>(false);
+  const [proposal, setProposal] = useState<GovernanceProposal>(initialProposal);
+  const [percentages, setPercentages] = useState(() => 
+    calculateVotePercentages(initialProposal.votesFor, initialProposal.votesAgainst)
+  );
 
   // Update time remaining every minute
   useEffect(() => {
@@ -38,11 +43,6 @@ const GovernanceVote: React.FC<GovernanceVoteProps> = ({ proposal, onVoteSuccess
 
     return () => clearInterval(interval);
   }, [proposal.endDate]);
-
-  const { forPercentage, againstPercentage } = calculateVotePercentages(
-    proposal.votesFor,
-    proposal.votesAgainst
-  );
 
   const handleVote = async (inFavor: boolean) => {
     if (!address) {
@@ -60,12 +60,37 @@ const GovernanceVote: React.FC<GovernanceVoteProps> = ({ proposal, onVoteSuccess
       const result = await castVote(proposal.id, address, inFavor, votingPower);
       
       if (result.success) {
+        // Update local state to immediately reflect the vote
+        const updatedProposal = {...proposal};
+        
+        if (inFavor) {
+          updatedProposal.votesFor += votingPower;
+        } else {
+          updatedProposal.votesAgainst += votingPower;
+        }
+        
+        // Update proposal and recalculate percentages
+        setProposal(updatedProposal);
+        setPercentages(calculateVotePercentages(updatedProposal.votesFor, updatedProposal.votesAgainst));
+        
         setHasVoted(true);
-        showAlert(`Vote cast successfully! You voted ${inFavor ? "FOR" : "AGAINST"} the proposal`);
+        
+        // Show toast notification
+        toast({
+          title: "Vote submitted successfully",
+          description: `You voted ${inFavor ? "FOR" : "AGAINST"} the proposal`,
+          variant: "default",
+        });
+        
         onVoteSuccess();
       }
     } catch (error) {
-      showAlert("Failed to cast vote. Please try again.");
+      console.error("Vote error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to cast vote. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setSubmitting(false);
     }
@@ -88,18 +113,18 @@ const GovernanceVote: React.FC<GovernanceVoteProps> = ({ proposal, onVoteSuccess
         <div className="h-2 bg-gray-100 rounded-full mb-3 overflow-hidden">
           <div
             className="h-full bg-green-500"
-            style={{ width: `${forPercentage}%` }}
+            style={{ width: `${percentages.forPercentage}%` }}
           ></div>
         </div>
 
         <div className="flex justify-between text-sm mb-5">
           <div className="flex items-center">
             <ThumbsUp className="h-3 w-3 mr-1 text-green-500" />
-            <span>{proposal.votesFor} ({forPercentage}%)</span>
+            <span>{proposal.votesFor} ({percentages.forPercentage}%)</span>
           </div>
           <div className="flex items-center">
             <ThumbsDown className="h-3 w-3 mr-1 text-red-500" />
-            <span>{proposal.votesAgainst} ({againstPercentage}%)</span>
+            <span>{proposal.votesAgainst} ({percentages.againstPercentage}%)</span>
           </div>
         </div>
 
