@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { toast } from "../hooks/use-toast";
 
 // Define the Telegram WebApp type
 declare global {
@@ -136,18 +137,22 @@ export const TelegramProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const showAlert = (message: string) => {
-    if (!tg) {
-      // Fallback alert for browser mode
-      alert(message);
-      return;
-    }
+    // Use toast notification instead of native Telegram alert
+    // which is causing errors with some Telegram WebApp versions
+    toast({
+      title: "Alert",
+      description: message,
+      duration: 3000,
+    });
     
-    try {
-      tg.showAlert(message);
-    } catch (error) {
-      // Fallback if showAlert is not supported
-      console.error("Error showing alert:", error);
-      alert(message);
+    // Try Telegram native alert as fallback but ignore errors
+    if (tg) {
+      try {
+        tg.showAlert(message);
+      } catch (error) {
+        // Silently ignore errors when Telegram alert fails
+        console.log("Using toast notification instead of Telegram alert");
+      }
     }
   };
 

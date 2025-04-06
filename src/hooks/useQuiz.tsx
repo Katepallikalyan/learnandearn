@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useTelegram } from "../context/TelegramContext";
 import { useWeb3 } from "../context/Web3Context";
 import { getQuizQuestions, submitQuizAnswers } from "../services/api";
+import { toast } from "../hooks/use-toast";
 
 interface QuizQuestion {
   id: number;
@@ -34,28 +35,49 @@ export const useQuiz = (topicId: number) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [fetchAttempt, setFetchAttempt] = useState<number>(0);
 
-  // Fetch quiz questions
+  // Fetch quiz questions with retry mechanism
   useEffect(() => {
     const fetchQuestions = async () => {
+      if (topicId <= 0) return;
+      
       try {
         setLoading(true);
         setError(null);
         const data = await getQuizQuestions(topicId);
-        setQuestions(data);
+        
+        if (data && data.length > 0) {
+          setQuestions(data);
+          // Reset other state when new questions are loaded
+          setCurrentQuestionIndex(0);
+          setAnswers([]);
+          setSelectedOption(null);
+          setQuizResult(null);
+        } else {
+          throw new Error("No questions found for this topic");
+        }
       } catch (err) {
         console.error("Failed to fetch quiz questions:", err);
         setError("Failed to load quiz questions. Please try again.");
+        // Auto-retry after a delay (up to 3 attempts)
+        if (fetchAttempt < 3) {
+          setTimeout(() => {
+            setFetchAttempt(prev => prev + 1);
+          }, 1500);
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchQuestions();
-  }, [topicId]);
+  }, [topicId, fetchAttempt]);
 
-  // Current question getter
-  const currentQuestion = questions[currentQuestionIndex];
+  // Current question getter with safety check
+  const currentQuestion = questions.length > 0 && currentQuestionIndex < questions.length 
+    ? questions[currentQuestionIndex] 
+    : null;
 
   // Check if we're on the last question
   const isLastQuestion = currentQuestionIndex === questions.length - 1;
@@ -94,7 +116,11 @@ export const useQuiz = (topicId: number) => {
   // Go to next question
   const goToNextQuestion = useCallback(() => {
     if (selectedOption === null) {
-      showAlert("Please select an answer before continuing");
+      toast({
+        title: "Required",
+        description: "Please select an answer before continuing",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -106,11 +132,36 @@ export const useQuiz = (topicId: number) => {
       setCurrentQuestionIndex((prevIndex) => prevIndex + 1);
       setSelectedOption(null);
     }
-  }, [isLastQuestion, selectedOption, showAlert]);
+  }, [isLastQuestion, selectedOption]);
 
   // Submit the quiz
   const submitQuiz = useCallback(async () => {
-    if (!user || !topicId) return;
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "User information not available",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!topicId) {
+      toast({
+        title: "Error",
+        description: "Quiz topic not selected",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (answers.length !== questions.length) {
+      toast({
+        title: "Error",
+        description: "Please answer all questions before submitting",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
       setSubmitting(true);
@@ -124,17 +175,37 @@ export const useQuiz = (topicId: number) => {
 
       setQuizResult(result);
 
-      // Refresh wallet balance if user earned tokens
+      // Show appropriate message based on result
       if (result.earnedReward > 0) {
-        await refreshBalance();
+        toast({
+          title: "Congratulations!",
+          description: `You earned ${result.earnedReward} LEARN tokens!`,
+          variant: "default",
+        });
+        
+        // Refresh wallet balance if user earned tokens
+        setTimeout(async () => {
+          await refreshBalance();
+        }, 1000);
+      } else {
+        toast({
+          title: "Quiz Completed",
+          description: `You scored ${Math.round(result.percentageCorrect)}%. Try again to earn rewards!`,
+          variant: "default",
+        });
       }
     } catch (err) {
       console.error("Failed to submit quiz:", err);
       setError("Failed to submit quiz. Please try again.");
+      toast({
+        title: "Error",
+        description: "Failed to submit quiz. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setSubmitting(false);
     }
-  }, [topicId, user, answers, refreshBalance]);
+  }, [topicId, user, answers, questions.length, refreshBalance]);
 
   // Reset the quiz to start over
   const resetQuiz = useCallback(() => {
@@ -142,6 +213,7 @@ export const useQuiz = (topicId: number) => {
     setAnswers([]);
     setSelectedOption(null);
     setQuizResult(null);
+    setError(null);
   }, []);
 
   return {
