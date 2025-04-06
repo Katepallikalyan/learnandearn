@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "../hooks/use-toast";
 
@@ -137,8 +136,7 @@ export const TelegramProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const showAlert = (message: string) => {
-    // Use toast notification instead of native Telegram alert
-    // which is causing errors with some Telegram WebApp versions
+    // Always use toast notifications
     toast({
       title: "Alert",
       description: message,
