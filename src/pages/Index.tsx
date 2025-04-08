@@ -9,7 +9,7 @@ import QuizQuestion from "../components/QuizQuestion";
 import GovernanceVote from "../components/GovernanceVote";
 import { useQuiz } from "../hooks/useQuiz";
 import { getQuizTopics, getGovernanceProposals } from "../services/api";
-import { Award, Check, X, Home, BookOpen, Vote } from "lucide-react";
+import { Award, Check, X, Home, Wallet, Vote, BookOpen } from "lucide-react";
 
 // Create enum for app views
 enum AppView {
@@ -91,6 +91,15 @@ const Index = () => {
                   />
                 ))
               )}
+            </div>
+            
+            <div className="bg-gradient-to-r from-indigo-100 to-purple-100 rounded-xl p-5 mb-6">
+              <h2 className="text-lg font-bold mb-2">Welcome to Learn & Earn!</h2>
+              <p className="text-gray-700 mb-3">Complete quizzes to earn LEARN tokens and participate in governance.</p>
+              <div className="flex items-center text-indigo-600 font-medium">
+                <BookOpen className="h-4 w-4 mr-2" />
+                <span>Start learning today</span>
+              </div>
             </div>
           </div>
         );
@@ -287,7 +296,7 @@ const Index = () => {
           {renderView()}
           
           {/* Bottom Navigation */}
-          <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 flex justify-around">
+          <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 flex justify-around shadow-lg">
             <button
               onClick={() => setCurrentView(AppView.HOME)}
               className={`p-2 flex flex-col items-center ${
@@ -314,7 +323,7 @@ const Index = () => {
                 currentView === AppView.WALLET ? "text-indigo-600" : "text-gray-500"
               }`}
             >
-              <Award className="h-5 w-5" />
+              <Wallet className="h-5 w-5" />
               <span className="text-xs mt-1">Wallet</span>
             </button>
           </nav>

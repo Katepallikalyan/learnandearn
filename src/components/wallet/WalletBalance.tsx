@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Coins } from "lucide-react";
+import { Coins, Check } from "lucide-react";
 import { formatTokenBalance } from "../../utils/hathorUtils";
 
 interface WalletBalanceProps {
@@ -10,18 +10,21 @@ interface WalletBalanceProps {
 
 const WalletBalance: React.FC<WalletBalanceProps> = ({ balance, votingPower }) => {
   return (
-    <div>
-      <div className="flex items-center justify-between mb-4">
-        <div className="text-sm text-gray-500">Token Balance</div>
-        <div className="font-semibold flex items-center">
-          <Coins className="h-4 w-4 mr-1 text-amber-500" />
+    <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+      <div className="flex items-center justify-between mb-5">
+        <div className="text-sm font-medium text-gray-500">Token Balance</div>
+        <div className="font-semibold flex items-center text-lg">
+          <Coins className="h-5 w-5 mr-2 text-amber-500" />
           {formatTokenBalance(balance)}
         </div>
       </div>
 
-      <div className="flex items-center justify-between mb-4">
-        <div className="text-sm text-gray-500">Voting Power</div>
-        <div className="font-semibold">{votingPower}</div>
+      <div className="flex items-center justify-between">
+        <div className="text-sm font-medium text-gray-500">Voting Power</div>
+        <div className="font-semibold flex items-center text-lg">
+          <Check className="h-5 w-5 mr-2 text-green-500" />
+          {votingPower}
+        </div>
       </div>
     </div>
   );

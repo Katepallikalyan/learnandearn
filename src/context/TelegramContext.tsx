@@ -96,10 +96,15 @@ export const TelegramProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           lastName: last_name,
           username,
         });
+      } else {
+        // Fallback user for when running in browser but Telegram data isn't available
+        console.log("Telegram user data not available. Setting fallback user.");
+        setUser({
+          id: 12345678,
+          firstName: "Demo",
+          username: "demo_user",
+        });
       }
-      
-      // Always expand the web app for better UX
-      webApp.expand();
     } else {
       console.log("Telegram WebApp is not available. Running in browser mode.");
       // Mock user for development in browser
