@@ -2,6 +2,7 @@
 import React from "react";
 import { QrCode, Send } from "lucide-react";
 import { toast } from "../../hooks/use-toast";
+import { useTelegram } from "../../context/TelegramContext";
 
 interface TokenActionsProps {
   address: string | null;
@@ -10,18 +11,35 @@ interface TokenActionsProps {
 }
 
 const TokenActions: React.FC<TokenActionsProps> = ({ address, showSendForm, onShowSendForm }) => {
+  const { hapticFeedback, tg } = useTelegram();
+  
   const handleReceiveClick = () => {
+    hapticFeedback.selection();
+    const message = address ? `Your address: ${address}` : "Wallet not connected";
+    
     toast({
       title: "Receive Tokens",
-      description: address ? `Your address: ${address}` : "Wallet not connected",
+      description: message,
     });
+    
+    // Try to copy address to clipboard
+    if (address) {
+      navigator.clipboard.writeText(address)
+        .then(() => hapticFeedback.success())
+        .catch(() => console.log("Clipboard write failed"));
+    }
+  };
+
+  const handleSendClick = () => {
+    hapticFeedback.selection();
+    onShowSendForm();
   };
 
   return (
     <>
       {!showSendForm && (
         <button
-          onClick={onShowSendForm}
+          onClick={handleSendClick}
           className="w-full bg-indigo-600 text-white rounded-lg py-2 mb-3 hover:bg-indigo-700 transition-colors flex items-center justify-center"
         >
           <Send className="h-4 w-4 mr-2" />

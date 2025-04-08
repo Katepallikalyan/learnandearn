@@ -26,6 +26,7 @@ const Index = () => {
   const [quizTitle, setQuizTitle] = useState<string>("");
   const [proposals, setProposals] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const { tg, showBackButton, hideBackButton, hapticFeedback } = useTelegram();
 
   // Get quiz state from custom hook when a quiz is selected
   const quiz = useQuiz(selectedQuizId || 0);
@@ -50,8 +51,24 @@ const Index = () => {
     fetchData();
   }, []);
 
+  // Handle back button functionality for Telegram
+  useEffect(() => {
+    if (currentView !== AppView.HOME) {
+      showBackButton(() => {
+        handleBackToHome();
+      });
+    } else {
+      hideBackButton();
+    }
+    
+    return () => {
+      hideBackButton();
+    };
+  }, [currentView]);
+
   // Select a quiz to start
   const handleSelectQuiz = (id: number, title: string) => {
+    hapticFeedback.selection();
     setSelectedQuizId(id);
     setQuizTitle(title);
     setCurrentView(AppView.QUIZ);
@@ -59,6 +76,7 @@ const Index = () => {
 
   // Return to home screen
   const handleBackToHome = () => {
+    hapticFeedback.selection();
     // Reset quiz state if we're coming from quiz
     if (currentView === AppView.QUIZ && quiz.quizResult) {
       quiz.resetQuiz();
@@ -298,7 +316,10 @@ const Index = () => {
           {/* Bottom Navigation */}
           <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 flex justify-around shadow-lg">
             <button
-              onClick={() => setCurrentView(AppView.HOME)}
+              onClick={() => {
+                hapticFeedback.selection();
+                setCurrentView(AppView.HOME);
+              }}
               className={`p-2 flex flex-col items-center ${
                 currentView === AppView.HOME ? "text-indigo-600" : "text-gray-500"
               }`}
@@ -308,7 +329,10 @@ const Index = () => {
             </button>
             
             <button
-              onClick={() => setCurrentView(AppView.GOVERNANCE)}
+              onClick={() => {
+                hapticFeedback.selection();
+                setCurrentView(AppView.GOVERNANCE);
+              }}
               className={`p-2 flex flex-col items-center ${
                 currentView === AppView.GOVERNANCE ? "text-indigo-600" : "text-gray-500"
               }`}
@@ -318,7 +342,10 @@ const Index = () => {
             </button>
             
             <button
-              onClick={() => setCurrentView(AppView.WALLET)}
+              onClick={() => {
+                hapticFeedback.selection();
+                setCurrentView(AppView.WALLET);
+              }}
               className={`p-2 flex flex-col items-center ${
                 currentView === AppView.WALLET ? "text-indigo-600" : "text-gray-500"
               }`}

@@ -2,9 +2,27 @@
 import React from "react";
 import { Wallet } from "lucide-react";
 import { useWeb3 } from "../../context/Web3Context";
+import { useTelegram } from "../../context/TelegramContext";
 
 const WalletConnect: React.FC = () => {
   const { connectWallet } = useWeb3();
+  const { hapticFeedback, showMainButton, hideMainButton } = useTelegram();
+
+  const handleConnect = async () => {
+    hapticFeedback.selection();
+    showMainButton("Connecting...", () => {});
+    
+    try {
+      const success = await connectWallet();
+      if (success) {
+        hapticFeedback.success();
+      } else {
+        hapticFeedback.error();
+      }
+    } finally {
+      hideMainButton();
+    }
+  };
 
   return (
     <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100">
@@ -15,7 +33,7 @@ const WalletConnect: React.FC = () => {
           Connect your wallet to view your balance and earning history
         </p>
         <button
-          onClick={connectWallet}
+          onClick={handleConnect}
           className="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors"
         >
           Connect Wallet

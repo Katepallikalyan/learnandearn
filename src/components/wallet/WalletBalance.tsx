@@ -2,6 +2,7 @@
 import React from "react";
 import { Coins, Check } from "lucide-react";
 import { formatTokenBalance } from "../../utils/hathorUtils";
+import { useTelegram } from "../../context/TelegramContext";
 
 interface WalletBalanceProps {
   balance: number;
@@ -9,8 +10,17 @@ interface WalletBalanceProps {
 }
 
 const WalletBalance: React.FC<WalletBalanceProps> = ({ balance, votingPower }) => {
+  const { hapticFeedback } = useTelegram();
+  
+  const handleTouch = () => {
+    hapticFeedback.selection();
+  };
+
   return (
-    <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+    <div 
+      className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm"
+      onTouchStart={handleTouch}
+    >
       <div className="flex items-center justify-between mb-5">
         <div className="text-sm font-medium text-gray-500">Token Balance</div>
         <div className="font-semibold flex items-center text-lg">

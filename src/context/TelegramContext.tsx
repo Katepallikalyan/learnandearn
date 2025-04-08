@@ -41,6 +41,17 @@ interface TelegramWebApp {
       last_name?: string;
       username?: string;
     };
+    start_param?: string;
+  };
+  isExpanded: boolean;
+  viewportHeight: number;
+  viewportStableHeight: number;
+  sendData: (data: string) => void;
+  openLink: (url: string) => void;
+  HapticFeedback: {
+    impactOccurred: (style: 'light' | 'medium' | 'heavy' | 'rigid' | 'soft') => void;
+    notificationOccurred: (type: 'error' | 'success' | 'warning') => void;
+    selectionChanged: () => void;
   };
 }
 
@@ -58,6 +69,12 @@ interface TelegramContextProps {
   showBackButton: (callback: () => void) => void;
   hideBackButton: () => void;
   showAlert: (message: string) => void;
+  closeApp: () => void;
+  hapticFeedback: {
+    success: () => void;
+    error: () => void;
+    selection: () => void;
+  };
 }
 
 const TelegramContext = createContext<TelegramContextProps>({
@@ -69,6 +86,12 @@ const TelegramContext = createContext<TelegramContextProps>({
   showBackButton: () => {},
   hideBackButton: () => {},
   showAlert: () => {},
+  closeApp: () => {},
+  hapticFeedback: {
+    success: () => {},
+    error: () => {},
+    selection: () => {},
+  }
 });
 
 export const useTelegram = () => useContext(TelegramContext);
@@ -83,8 +106,11 @@ export const TelegramProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const webApp = window.Telegram?.WebApp;
     
     if (webApp) {
+      console.log("Telegram WebApp initialized", webApp);
       setTg(webApp);
       webApp.ready();
+      // Expand the app to fit the full screen
+      webApp.expand();
       setReady(true);
       
       // Extract user data if available
@@ -96,6 +122,7 @@ export const TelegramProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           lastName: last_name,
           username,
         });
+        console.log("Telegram user data loaded:", first_name);
       } else {
         // Fallback user for when running in browser but Telegram data isn't available
         console.log("Telegram user data not available. Setting fallback user.");
@@ -160,6 +187,38 @@ export const TelegramProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   };
 
+  const closeApp = () => {
+    if (!tg) return;
+    tg.close();
+  };
+
+  const hapticFeedback = {
+    success: () => {
+      if (!tg?.HapticFeedback) return;
+      try {
+        tg.HapticFeedback.notificationOccurred('success');
+      } catch (error) {
+        console.log("Haptic feedback not supported");
+      }
+    },
+    error: () => {
+      if (!tg?.HapticFeedback) return;
+      try {
+        tg.HapticFeedback.notificationOccurred('error');
+      } catch (error) {
+        console.log("Haptic feedback not supported");
+      }
+    },
+    selection: () => {
+      if (!tg?.HapticFeedback) return;
+      try {
+        tg.HapticFeedback.selectionChanged();
+      } catch (error) {
+        console.log("Haptic feedback not supported");
+      }
+    }
+  };
+
   return (
     <TelegramContext.Provider
       value={{
@@ -171,6 +230,8 @@ export const TelegramProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         showBackButton,
         hideBackButton,
         showAlert,
+        closeApp,
+        hapticFeedback,
       }}
     >
       {children}
