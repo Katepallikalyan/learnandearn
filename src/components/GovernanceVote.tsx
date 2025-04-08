@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import { useWeb3 } from "../context/Web3Context";
 import { ThumbsUp, ThumbsDown, Timer, Check } from "lucide-react";
 import { calculateTimeRemaining, calculateVotePercentages } from "../utils/hathorUtils";
-import { castVote } from "../services/api";
 import { useTelegram } from "../context/TelegramContext";
 import { toast } from "../hooks/use-toast";
 
@@ -23,7 +22,7 @@ interface GovernanceVoteProps {
 }
 
 const GovernanceVote: React.FC<GovernanceVoteProps> = ({ proposal: initialProposal, onVoteSuccess }) => {
-  const { address, votingPower } = useWeb3();
+  const { address, votingPower, castVote } = useWeb3();
   const { showAlert } = useTelegram();
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [timeRemaining, setTimeRemaining] = useState<string>(
@@ -57,9 +56,9 @@ const GovernanceVote: React.FC<GovernanceVoteProps> = ({ proposal: initialPropos
 
     try {
       setSubmitting(true);
-      const result = await castVote(proposal.id, address, inFavor, votingPower);
+      const result = await castVote(proposal.id, inFavor);
       
-      if (result.success) {
+      if (result) {
         // Update local state to immediately reflect the vote
         const updatedProposal = {...proposal};
         
