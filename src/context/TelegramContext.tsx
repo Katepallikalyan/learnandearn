@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "../hooks/use-toast";
 
@@ -74,6 +75,8 @@ interface TelegramContextProps {
     error: () => void;
     selection: () => void;
   };
+  isInsideTelegram: boolean;
+  openExternalLink: (url: string) => void;
 }
 
 const TelegramContext = createContext<TelegramContextProps>({
@@ -90,7 +93,9 @@ const TelegramContext = createContext<TelegramContextProps>({
     success: () => {},
     error: () => {},
     selection: () => {},
-  }
+  },
+  isInsideTelegram: false,
+  openExternalLink: () => {},
 });
 
 export const useTelegram = () => useContext(TelegramContext);
@@ -99,6 +104,7 @@ export const TelegramProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [tg, setTg] = useState<TelegramWebApp | null>(null);
   const [ready, setReady] = useState(false);
   const [user, setUser] = useState<TelegramContextProps["user"]>(null);
+  const [isInsideTelegram, setIsInsideTelegram] = useState(false);
 
   useEffect(() => {
     // Access Telegram WebApp API
@@ -107,7 +113,11 @@ export const TelegramProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (webApp) {
       console.log("Telegram WebApp initialized", webApp);
       setTg(webApp);
+      setIsInsideTelegram(true);
+      
+      // Tell Telegram the WebApp is ready
       webApp.ready();
+      
       // Expand the app to fit the full screen
       webApp.expand();
       setReady(true);
@@ -191,6 +201,16 @@ export const TelegramProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     tg.close();
   };
 
+  const openExternalLink = (url: string) => {
+    if (tg) {
+      // Use Telegram's openLink for external URLs
+      tg.openLink(url);
+    } else {
+      // Fallback for browser environment
+      window.open(url, '_blank');
+    }
+  };
+
   const hapticFeedback = {
     success: () => {
       if (!tg?.HapticFeedback) return;
@@ -231,6 +251,8 @@ export const TelegramProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         showAlert,
         closeApp,
         hapticFeedback,
+        isInsideTelegram,
+        openExternalLink,
       }}
     >
       {children}
