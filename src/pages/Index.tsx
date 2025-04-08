@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from "react";
-import { TelegramProvider } from "../context/TelegramContext";
+import { TelegramProvider, useTelegram } from "../context/TelegramContext";
 import { Web3Provider } from "../context/Web3Context";
 import Header from "../components/Header";
 import QuizCard from "../components/QuizCard";
