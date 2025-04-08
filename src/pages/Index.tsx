@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { TelegramProvider, useTelegram } from "../context/TelegramContext";
 import { Web3Provider } from "../context/Web3Context";
@@ -18,7 +19,8 @@ enum AppView {
   WALLET = "wallet",
 }
 
-const Index = () => {
+// Create a content component to use the useTelegram hook
+const AppContent = () => {
   const [currentView, setCurrentView] = useState<AppView>(AppView.HOME);
   const [quizTopics, setQuizTopics] = useState<any[]>([]);
   const [selectedQuizId, setSelectedQuizId] = useState<number | null>(null);
@@ -305,55 +307,62 @@ const Index = () => {
   };
 
   return (
+    <div className="min-h-screen bg-gray-50 pb-16">
+      <Header title={currentView === AppView.QUIZ ? quizTitle : undefined} />
+      
+      {renderView()}
+      
+      {/* Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 flex justify-around shadow-lg">
+        <button
+          onClick={() => {
+            hapticFeedback.selection();
+            setCurrentView(AppView.HOME);
+          }}
+          className={`p-2 flex flex-col items-center ${
+            currentView === AppView.HOME ? "text-indigo-600" : "text-gray-500"
+          }`}
+        >
+          <Home className="h-5 w-5" />
+          <span className="text-xs mt-1">Home</span>
+        </button>
+        
+        <button
+          onClick={() => {
+            hapticFeedback.selection();
+            setCurrentView(AppView.GOVERNANCE);
+          }}
+          className={`p-2 flex flex-col items-center ${
+            currentView === AppView.GOVERNANCE ? "text-indigo-600" : "text-gray-500"
+          }`}
+        >
+          <Vote className="h-5 w-5" />
+          <span className="text-xs mt-1">Vote</span>
+        </button>
+        
+        <button
+          onClick={() => {
+            hapticFeedback.selection();
+            setCurrentView(AppView.WALLET);
+          }}
+          className={`p-2 flex flex-col items-center ${
+            currentView === AppView.WALLET ? "text-indigo-600" : "text-gray-500"
+          }`}
+        >
+          <Wallet className="h-5 w-5" />
+          <span className="text-xs mt-1">Wallet</span>
+        </button>
+      </nav>
+    </div>
+  );
+};
+
+// Main component that provides context
+const Index = () => {
+  return (
     <TelegramProvider>
       <Web3Provider>
-        <div className="min-h-screen bg-gray-50 pb-16">
-          <Header title={currentView === AppView.QUIZ ? quizTitle : undefined} />
-          
-          {renderView()}
-          
-          {/* Bottom Navigation */}
-          <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 flex justify-around shadow-lg">
-            <button
-              onClick={() => {
-                hapticFeedback.selection();
-                setCurrentView(AppView.HOME);
-              }}
-              className={`p-2 flex flex-col items-center ${
-                currentView === AppView.HOME ? "text-indigo-600" : "text-gray-500"
-              }`}
-            >
-              <Home className="h-5 w-5" />
-              <span className="text-xs mt-1">Home</span>
-            </button>
-            
-            <button
-              onClick={() => {
-                hapticFeedback.selection();
-                setCurrentView(AppView.GOVERNANCE);
-              }}
-              className={`p-2 flex flex-col items-center ${
-                currentView === AppView.GOVERNANCE ? "text-indigo-600" : "text-gray-500"
-              }`}
-            >
-              <Vote className="h-5 w-5" />
-              <span className="text-xs mt-1">Vote</span>
-            </button>
-            
-            <button
-              onClick={() => {
-                hapticFeedback.selection();
-                setCurrentView(AppView.WALLET);
-              }}
-              className={`p-2 flex flex-col items-center ${
-                currentView === AppView.WALLET ? "text-indigo-600" : "text-gray-500"
-              }`}
-            >
-              <Wallet className="h-5 w-5" />
-              <span className="text-xs mt-1">Wallet</span>
-            </button>
-          </nav>
-        </div>
+        <AppContent />
       </Web3Provider>
     </TelegramProvider>
   );
