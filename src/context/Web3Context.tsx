@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "../hooks/use-toast";
 
@@ -48,17 +47,15 @@ export const Web3Provider: React.FC<{ children: React.ReactNode }> = ({ children
   const [votingPower, setVotingPower] = useState<number>(0);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
-  // Load wallet data on initial render
+  // Auto connect wallet on initial render
   useEffect(() => {
-    const savedAddress = localStorage.getItem("walletAddress");
-    if (savedAddress) {
-      setAddress(savedAddress);
-      setIsConnected(true);
-      refreshBalance();
+    // Auto-connect for demo purposes
+    if (!isConnected) {
+      connectWallet();
     }
   }, []);
 
-  // Connect wallet function
+  // Connect wallet function - simplified for auto-connect
   const connectWallet = async (): Promise<boolean> => {
     try {
       // For this demo, we'll create a mock wallet address
@@ -67,39 +64,26 @@ export const Web3Provider: React.FC<{ children: React.ReactNode }> = ({ children
       setAddress(mockAddress);
       setIsConnected(true);
       
-      // Save to localStorage for persistence
-      localStorage.setItem("walletAddress", mockAddress);
-      
       // Initialize with some tokens
-      if (balance === 0) {
-        setBalance(50);
-        setVotingPower(5);
-        
-        // Add initial transaction
-        const newTx: Transaction = {
-          id: "tx_" + Math.random().toString(36).substring(2, 10),
-          type: "receive",
-          description: "Initial wallet funding",
-          amount: 50,
-          timestamp: new Date(),
-        };
-        
-        setTransactions([newTx]);
-      }
+      setBalance(50);
+      setVotingPower(5);
       
-      toast({
-        title: "Wallet Connected",
-        description: "Your wallet has been connected successfully",
-      });
+      // Add initial transaction
+      const newTx: Transaction = {
+        id: "tx_" + Math.random().toString(36).substring(2, 10),
+        type: "receive",
+        description: "Initial wallet funding",
+        amount: 50,
+        timestamp: new Date(),
+      };
+      
+      setTransactions([newTx]);
+      
+      console.log("Wallet auto-connected:", mockAddress);
       
       return true;
     } catch (error) {
       console.error("Failed to connect wallet:", error);
-      toast({
-        title: "Error",
-        description: "Failed to connect wallet",
-        variant: "destructive",
-      });
       return false;
     }
   };

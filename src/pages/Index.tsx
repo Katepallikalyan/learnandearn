@@ -357,7 +357,7 @@ const AppContent = () => {
   );
 };
 
-// Main component that provides context
+// Wrapper component that provides context
 const Index = () => {
   return (
     <TelegramProvider>
