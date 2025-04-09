@@ -37,6 +37,13 @@ export const useQuiz = (topicId: number) => {
   const [error, setError] = useState<string | null>(null);
   const [fetchAttempt, setFetchAttempt] = useState<number>(0);
 
+  // Reset everything when topic changes
+  useEffect(() => {
+    if (topicId > 0) {
+      resetQuiz();
+    }
+  }, [topicId]);
+
   // Fetch quiz questions with retry mechanism
   useEffect(() => {
     const fetchQuestions = async () => {
