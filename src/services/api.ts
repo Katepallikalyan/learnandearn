@@ -103,7 +103,177 @@ const QUIZ_QUESTIONS = {
       correctAnswer: 1,
     },
   ],
-  // Additional quiz questions would be defined here for other topics
+  2: [
+    {
+      id: 201,
+      question: "What is a smart contract?",
+      options: [
+        "A legal agreement between two parties",
+        "Self-executing code that runs on a blockchain",
+        "A type of cryptocurrency",
+        "A cryptographic algorithm",
+      ],
+      correctAnswer: 1,
+    },
+    {
+      id: 202,
+      question: "Which blockchain platform was first to introduce smart contracts?",
+      options: [
+        "Bitcoin",
+        "Ethereum",
+        "Cardano",
+        "Solana",
+      ],
+      correctAnswer: 1,
+    },
+    {
+      id: 203,
+      question: "What language is most commonly used for Ethereum smart contracts?",
+      options: [
+        "JavaScript",
+        "Python",
+        "Solidity",
+        "C++",
+      ],
+      correctAnswer: 2,
+    },
+    {
+      id: 204,
+      question: "What is gas in the context of smart contracts?",
+      options: [
+        "A cryptocurrency used to pay for transactions",
+        "The fee required to execute a smart contract",
+        "A measure of computational effort",
+        "A type of token standard",
+      ],
+      correctAnswer: 2,
+    },
+    {
+      id: 205,
+      question: "What is a DAO?",
+      options: [
+        "Digital Asset Organization",
+        "Decentralized Autonomous Organization",
+        "Digital Authentication Oracle",
+        "Distributed Application Overlay",
+      ],
+      correctAnswer: 1,
+    },
+  ],
+  3: [
+    {
+      id: 301,
+      question: "What does DeFi stand for?",
+      options: [
+        "Decentralized Finance",
+        "Digital Finance",
+        "Distributed Financial Infrastructure",
+        "Digital Financial Instruments",
+      ],
+      correctAnswer: 0,
+    },
+    {
+      id: 302,
+      question: "Which of the following is NOT a common DeFi application?",
+      options: [
+        "Lending and borrowing",
+        "Decentralized exchanges",
+        "Centralized payment processing",
+        "Yield farming",
+      ],
+      correctAnswer: 2,
+    },
+    {
+      id: 303,
+      question: "What is liquidity mining?",
+      options: [
+        "Mining cryptocurrencies with liquid cooling",
+        "Providing liquidity to protocols to earn rewards",
+        "Extracting value from flash loans",
+        "Converting between different cryptocurrencies",
+      ],
+      correctAnswer: 1,
+    },
+    {
+      id: 304,
+      question: "What is a flash loan?",
+      options: [
+        "A very fast loan approval process",
+        "A loan that must be repaid within the same block",
+        "A loan with extremely high interest",
+        "A loan backed by flash storage technology",
+      ],
+      correctAnswer: 1,
+    },
+    {
+      id: 305,
+      question: "What are stablecoins in DeFi?",
+      options: [
+        "Coins that never change in value",
+        "Cryptocurrencies designed to maintain a stable value relative to a reference asset",
+        "Tokens used only for staking",
+        "Governance tokens for stable protocols",
+      ],
+      correctAnswer: 1,
+    },
+  ],
+  4: [
+    {
+      id: 401,
+      question: "What does NFT stand for?",
+      options: [
+        "New Financial Token",
+        "Non-Fungible Token",
+        "Network File Transfer",
+        "New Function Technology",
+      ],
+      correctAnswer: 1,
+    },
+    {
+      id: 402,
+      question: "What makes NFTs different from cryptocurrencies like Bitcoin?",
+      options: [
+        "NFTs are faster to transfer",
+        "NFTs are less expensive",
+        "NFTs represent unique assets rather than identical, interchangeable units",
+        "NFTs don't use blockchain technology",
+      ],
+      correctAnswer: 2,
+    },
+    {
+      id: 403,
+      question: "Which of these is a common use case for NFTs?",
+      options: [
+        "Daily payments for goods and services",
+        "Store of value like gold",
+        "Digital art and collectibles",
+        "Cross-border money transfers",
+      ],
+      correctAnswer: 2,
+    },
+    {
+      id: 404,
+      question: "Which blockchain was originally most associated with NFTs?",
+      options: [
+        "Bitcoin",
+        "Ethereum",
+        "Solana",
+        "Binance Smart Chain",
+      ],
+      correctAnswer: 1,
+    },
+    {
+      id: 405,
+      question: "What is 'minting' in the context of NFTs?",
+      options: [
+        "Buying an NFT from a marketplace",
+        "Creating a new NFT on the blockchain",
+        "Transferring an NFT to another owner",
+        "Converting an NFT to cryptocurrency",
+      ],
+      correctAnswer: 1,
+    },
+  ],
 };
 
 // Mock proposals for governance
@@ -145,7 +315,14 @@ export const getQuizQuestions = async (topicId: number) => {
   
   await new Promise(resolve => setTimeout(resolve, 700));
   
-  return QUIZ_QUESTIONS[topicId as keyof typeof QUIZ_QUESTIONS] || [];
+  // Make sure all topic IDs return questions by using a fallback
+  const questions = QUIZ_QUESTIONS[topicId as keyof typeof QUIZ_QUESTIONS];
+  
+  if (!questions || questions.length === 0) {
+    throw new Error("No questions found for this topic");
+  }
+  
+  return questions;
 };
 
 // Submit quiz answers and get rewards
