@@ -9,17 +9,13 @@ interface WalletBalanceProps {
   votingPower: number;
 }
 
-const WalletBalance: React.FC<WalletBalanceProps> = ({ balance, votingPower }) => {
+const WalletBalance = ({ balance, votingPower }: WalletBalanceProps) => {
   const { hapticFeedback } = useTelegram();
-  
-  const handleTouch = () => {
-    hapticFeedback.selection();
-  };
 
   return (
     <div 
       className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm"
-      onTouchStart={handleTouch}
+      onTouchStart={() => hapticFeedback.selection()}
     >
       <div className="flex items-center justify-between mb-5">
         <div className="text-sm font-medium text-gray-500">Token Balance</div>
@@ -28,7 +24,6 @@ const WalletBalance: React.FC<WalletBalanceProps> = ({ balance, votingPower }) =
           {formatTokenBalance(balance)}
         </div>
       </div>
-
       <div className="flex items-center justify-between">
         <div className="text-sm font-medium text-gray-500">Voting Power</div>
         <div className="font-semibold flex items-center text-lg">

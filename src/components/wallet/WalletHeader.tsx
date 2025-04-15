@@ -10,14 +10,11 @@ interface WalletHeaderProps {
   onRefresh: () => void;
 }
 
-const WalletHeader: React.FC<WalletHeaderProps> = ({ address, refreshing, onRefresh }) => {
+const WalletHeader = ({ address, refreshing, onRefresh }: WalletHeaderProps) => {
   const handleCopyAddress = () => {
     if (address) {
       navigator.clipboard.writeText(address);
-      toast({
-        title: "Address copied",
-        description: "Wallet address copied to clipboard",
-      });
+      toast({ title: "Address copied" });
     }
   };
 
@@ -36,10 +33,7 @@ const WalletHeader: React.FC<WalletHeaderProps> = ({ address, refreshing, onRefr
       {address && (
         <div className="text-sm opacity-80 mt-1 flex items-center">
           <span>{formatAddress(address)}</span>
-          <button 
-            onClick={handleCopyAddress} 
-            className="ml-2 p-1 rounded-full hover:bg-white/20"
-          >
+          <button onClick={handleCopyAddress} className="ml-2 p-1 rounded-full hover:bg-white/20">
             <Copy className="h-3 w-3" />
           </button>
         </div>
