@@ -66,6 +66,11 @@ const AppContent = () => {
     setCurrentView(AppView.HOME);
     setSelectedQuizId(null);
   };
+  
+  const handleVoteSuccess = () => {
+    // Optionally refresh data after successful vote
+    console.log("Vote submitted successfully");
+  };
 
   const renderView = () => {
     switch (currentView) {
@@ -98,7 +103,11 @@ const AppContent = () => {
             ) : (
               <div className="space-y-4">
                 {proposals.map((proposal) => (
-                  <GovernanceVote key={proposal.id} proposal={proposal} />
+                  <GovernanceVote 
+                    key={proposal.id} 
+                    proposal={proposal} 
+                    onVoteSuccess={handleVoteSuccess}
+                  />
                 ))}
               </div>
             )}
